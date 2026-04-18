@@ -270,6 +270,7 @@ x86_ssse3_encode:
     jmp     .scalar_loop
 
 .done:
+    mov     byte [r14 + r15], 0
     mov     rax, r15
 
     pop     r15
@@ -278,3 +279,5 @@ x86_ssse3_encode:
     pop     r12
     pop     rbx
     ret
+
+section .note.GNU-stack noalloc noexec nowrite progbits

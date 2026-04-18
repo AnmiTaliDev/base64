@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install NASM
+        if: matrix.arch == 'amd64'
+        run: sudo apt-get install -y nasm
+
+      - name: Build
+        run: make
+
+      - name: Test
+        run: make test
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: base64-linux-${{ matrix.arch }}
+          path: build/base64
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Rename binaries
+        run: |
+          mv artifacts/base64-linux-amd64/base64    base64-linux-amd64
+          mv artifacts/base64-linux-aarch64/base64  base64-linux-aarch64
+          chmod +x base64-linux-amd64 base64-linux-aarch64
+
+      - name: Create release
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            base64-linux-amd64 \
+            base64-linux-aarch64
+        env:
+          GH_TOKEN: ${{ github.token }}

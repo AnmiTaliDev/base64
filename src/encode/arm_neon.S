@@ -245,3 +245,5 @@ enc_lut:
     // Non-AArch64: symbols provided by arm_neon.c stub.
     .text
 #endif
+
+    .section .note.GNU-stack, "", @progbits
