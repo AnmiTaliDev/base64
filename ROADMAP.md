@@ -9,16 +9,15 @@ they describe the next logical chunk of work.
       `base64_decoded_max_size`
 - [x] x86-64 SSSE3 encoder (`src/encode/x86_ssse3.asm`, NASM): 12 bytes/iter
 - [x] AArch64 NEON encoder (`src/encode/arm_neon.S`, GAS): 48 bytes/iter
+- [x] ARM32 NEON encoder (`src/encode/arm32_neon.S`, GAS): 24 bytes/iter;
+      runtime detection via `getauxval(AT_HWCAP) & HWCAP_NEON`
 - [x] Portable C fallback (`src/encode/generic.c`)
 - [x] Pluggable backend dispatch with runtime CPU detection
 - [x] Strict RFC 4648 decoder
 - [x] CLI tool, static library, test suite
 
-## v0.2.0 — Decoder optimization and ARM32
+## v0.2.0 — Decoder optimization
 
-- [x] ARM32 NEON encoder (`src/encode/arm32_neon.S`): same `vld3`/`vst4`
-      algorithm with 8-lane d-registers (24 bytes/iter); runtime detection via
-      `getauxval(AT_HWCAP) & HWCAP_NEON`
 - [ ] SSSE3-accelerated decoder: batch-validate and translate 16 output bytes
       at a time using a parallel table-lookup approach (Muła 2018)
 
