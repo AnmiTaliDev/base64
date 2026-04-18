@@ -1,7 +1,7 @@
 # base64
 
-Low-level Base64 encoder and decoder written in C with x86-64 assembly
-optimization. No external dependencies. Conforms to [RFC 4648].
+Low-level Base64 encoder and decoder written in C with assembly
+optimization. Conforms to [RFC 4648].
 
 [RFC 4648]: https://datatracker.ietf.org/doc/html/rfc4648
 
