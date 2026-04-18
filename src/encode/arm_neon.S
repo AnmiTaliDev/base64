@@ -94,42 +94,42 @@ arm_neon_encode:
     blt     .Lscalar_entry
 
     // ld3: load 48 bytes from src+i, de-interleave into:
-    //   v2 = a  (bytes 0, 3, 6, …, 45)
-    //   v3 = b  (bytes 1, 4, 7, …, 46)
-    //   v4 = c  (bytes 2, 5, 8, …, 47)
+    //   v0 = a  (bytes 0, 3, 6, …, 45)
+    //   v1 = b  (bytes 1, 4, 7, …, 46)
+    //   v2 = c  (bytes 2, 5, 8, …, 47)
     add     x0, x19, x22
-    ld3     {v2.16b, v3.16b, v4.16b}, [x0]
+    ld3     {v0.16b, v1.16b, v2.16b}, [x0]
 
-    // idx0 (v5) = a >> 2
-    ushr    v5.16b, v2.16b, #2
+    // idx0 (v3) = a >> 2
+    ushr    v3.16b, v0.16b, #2
 
-    // idx1 (v6) = (a & 0x03) << 4 | (b >> 4)
-    and     v6.16b, v2.16b, v23.16b     // a & 0x03
-    shl     v6.16b, v6.16b,  #4
-    ushr    v7.16b, v3.16b,  #4         // b >> 4
-    orr     v6.16b, v6.16b, v7.16b
+    // idx1 (v4) = (a & 0x03) << 4 | (b >> 4)
+    ushr    v4.16b, v1.16b,  #4         // b >> 4
+    and     v7.16b, v0.16b, v23.16b     // a & 0x03
+    shl     v7.16b, v7.16b,  #4
+    orr     v4.16b, v4.16b, v7.16b
 
-    // idx2 (v7) = (b & 0x0F) << 2 | (c >> 6)
-    // v2 (a) is no longer needed; reuse it as a temporary.
-    and     v7.16b, v3.16b, v24.16b     // b & 0x0F
+    // idx2 (v5) = (b & 0x0F) << 2 | (c >> 6)
+    ushr    v5.16b, v2.16b,  #6         // c >> 6
+    and     v7.16b, v1.16b, v24.16b     // b & 0x0F
     shl     v7.16b, v7.16b,  #2
-    ushr    v2.16b, v4.16b,  #6         // c >> 6  (v2 overwritten — a done)
-    orr     v7.16b, v7.16b, v2.16b
+    orr     v5.16b, v5.16b, v7.16b
 
-    // idx3 (v2) = c & 0x3F
-    and     v2.16b, v4.16b, v25.16b
+    // idx3 (v6) = c & 0x3F
+    and     v6.16b, v2.16b, v25.16b
 
     // Translate each index vector to ASCII.
-    // ASCII_XLAT clobbers v0 (offset) and v1 (cmp temp), which are free here.
+    // a/b/c (v0-v2) are no longer needed; ASCII_XLAT clobbers v0 and v1.
+    ASCII_XLAT v3.16b
+    ASCII_XLAT v4.16b
     ASCII_XLAT v5.16b
     ASCII_XLAT v6.16b
-    ASCII_XLAT v7.16b
-    ASCII_XLAT v2.16b
 
     // st4: store 64 bytes interleaved as
     //   [idx0[0], idx1[0], idx2[0], idx3[0], idx0[1], …]
+    // v3-v6 are consecutive — required by st4.
     add     x0, x21, x23
-    st4     {v5.16b, v6.16b, v7.16b, v2.16b}, [x0]
+    st4     {v3.16b, v4.16b, v5.16b, v6.16b}, [x0]
 
     add     x22, x22, #48
     add     x23, x23, #64

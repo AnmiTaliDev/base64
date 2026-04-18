@@ -16,11 +16,11 @@ they describe the next logical chunk of work.
 
 ## v0.2.0 — Decoder optimization and ARM32
 
+- [x] ARM32 NEON encoder (`src/encode/arm32_neon.S`): same `vld3`/`vst4`
+      algorithm with 8-lane d-registers (24 bytes/iter); runtime detection via
+      `getauxval(AT_HWCAP) & HWCAP_NEON`
 - [ ] SSSE3-accelerated decoder: batch-validate and translate 16 output bytes
       at a time using a parallel table-lookup approach (Muła 2018)
-- [ ] ARM32 NEON encoder (`src/encode/arm32_neon.S`): same `ld3`/`st4`
-      algorithm with 8-lane `vld3` (24 bytes/iter); runtime detection via
-      `getauxval(AT_HWCAP) & HWCAP_NEON`
 
 ## v0.3.0 — AVX2 encoder
 

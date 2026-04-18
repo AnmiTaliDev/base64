@@ -31,4 +31,8 @@ size_t x86_ssse3_encode(const uint8_t *src, size_t src_len, char *dst);
 int    arm_neon_supported(void);
 size_t arm_neon_encode(const uint8_t *src, size_t src_len, char *dst);
 
+// ARM32 NEON encoder.
+int    arm32_neon_supported(void);
+size_t arm32_neon_encode(const uint8_t *src, size_t src_len, char *dst);
+
 #endif

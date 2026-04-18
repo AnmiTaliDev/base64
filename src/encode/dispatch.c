@@ -16,9 +16,10 @@
 // Priority table: first entry with supported() == 1 wins.
 // Keep faster/more-specific implementations at the top.
 static const base64_encoder_t encoders[] = {
-    { "arm_neon",  arm_neon_supported,  arm_neon_encode  },
-    { "x86_ssse3", x86_ssse3_supported, x86_ssse3_encode },
-    { "generic",   generic_supported,   generic_encode   },
+    { "arm_neon",   arm_neon_supported,   arm_neon_encode   },
+    { "arm32_neon", arm32_neon_supported, arm32_neon_encode },
+    { "x86_ssse3",  x86_ssse3_supported,  x86_ssse3_encode  },
+    { "generic",    generic_supported,    generic_encode    },
 };
 
 #define ENCODER_COUNT (sizeof(encoders) / sizeof(encoders[0]))
