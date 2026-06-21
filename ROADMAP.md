@@ -18,7 +18,7 @@ they describe the next logical chunk of work.
 
 ## v0.2.0 — Decoder optimization
 
-- [ ] SSSE3-accelerated decoder: batch-validate and translate 16 output bytes
+- [x] SSSE3-accelerated decoder: batch-validate and translate 16 output bytes
       at a time using a parallel table-lookup approach (Muła 2018)
 
 ## v0.3.0 — AVX2 encoder

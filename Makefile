@@ -8,6 +8,7 @@ AR        := ar
 BUILD     := build
 SRC       := src
 ENCDIR    := src/encode
+DECDIR    := src/decode
 TESTDIR   := tests
 
 ARCH := $(shell uname -m)
@@ -18,13 +19,17 @@ CFLAGS       := -std=c11 -Wall -Wextra -Wpedantic -O2 -march=x86-64-v2 -Iinclude
 NASMFLAGS    := -f elf64
 ENC_ASM_SRCS := $(wildcard $(ENCDIR)/*.asm)
 ENC_ASM_OBJS := $(patsubst $(ENCDIR)/%.asm, $(BUILD)/enc_%.o, $(ENC_ASM_SRCS))
+DEC_ASM_SRCS := $(wildcard $(DECDIR)/*.asm)
+DEC_ASM_OBJS := $(patsubst $(DECDIR)/%.asm, $(BUILD)/dec_%.o, $(DEC_ASM_SRCS))
 else
 CFLAGS       := -std=c11 -Wall -Wextra -Wpedantic -O2 -Iinclude
 ENC_ASM_SRCS :=
 ENC_ASM_OBJS :=
+DEC_ASM_SRCS :=
+DEC_ASM_OBJS :=
 endif
 
-# Core objects (size helpers + decoder)
+# Core objects (size helpers)
 CORE_OBJS := $(BUILD)/base64.o
 
 # Encoder C sources (dispatch + per-arch implementations)
@@ -36,8 +41,12 @@ ENC_C_OBJS   := $(patsubst $(ENCDIR)/%.c, $(BUILD)/enc_%.o, $(ENC_C_SRCS))
 ENC_GAS_SRCS := $(wildcard $(ENCDIR)/*.S)
 ENC_GAS_OBJS := $(patsubst $(ENCDIR)/%.S, $(BUILD)/enc_%_s.o, $(ENC_GAS_SRCS))
 
+DEC_C_SRCS   := $(wildcard $(DECDIR)/*.c)
+DEC_C_OBJS   := $(patsubst $(DECDIR)/%.c, $(BUILD)/dec_%.o, $(DEC_C_SRCS))
+
 ENC_OBJS  := $(ENC_C_OBJS) $(ENC_ASM_OBJS) $(ENC_GAS_OBJS)
-ALL_OBJS  := $(CORE_OBJS) $(ENC_OBJS)
+DEC_OBJS  := $(DEC_C_OBJS) $(DEC_ASM_OBJS)
+ALL_OBJS  := $(CORE_OBJS) $(ENC_OBJS) $(DEC_OBJS)
 
 LIB      := $(BUILD)/libbase64.a
 TARGET   := $(BUILD)/base64
@@ -63,6 +72,12 @@ $(BUILD)/enc_%.o: $(ENCDIR)/%.asm | $(BUILD)
 
 $(BUILD)/enc_%_s.o: $(ENCDIR)/%.S | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/dec_%.o: $(DECDIR)/%.c $(DECDIR)/decode.h include/base64.h | $(BUILD)
+	$(CC) $(CFLAGS) -I$(DECDIR) -c $< -o $@
+
+$(BUILD)/dec_%.o: $(DECDIR)/%.asm | $(BUILD)
+	$(NASM) $(NASMFLAGS) $< -o $@
 
 $(BUILD)/main.o: $(SRC)/main.c include/base64.h | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
